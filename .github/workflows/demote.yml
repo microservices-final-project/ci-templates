@@ -1,0 +1,62 @@
+name: Demote Secrets from Org to Repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      secret_name:
+        description: 'Name of the secret to demote'
+        required: true
+
+jobs:
+  demote-secret:
+    runs-on: ubuntu-latest
+    env:
+      ORG: microservices-final-project
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install GitHub CLI
+        run: sudo apt-get update && sudo apt-get install gh -y
+
+      - name: Authenticate with GitHub CLI
+        run: |
+          if [ -z "${{ secrets.GH_PAT }}" ]; then
+            echo "ERROR: GH_PAT secret is not set"
+            exit 1
+          fi
+          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+          gh auth status
+
+      - name: Get Org Secret Value
+        id: get_secret
+        run: |
+          secret_name="${{ github.event.inputs.secret_name }}"
+          secret_value=$(gh secret list --org "$ORG" | grep "^$secret_name" | awk '{print $1}')
+          
+          if [ -z "$secret_value" ]; then
+            echo "::error::Secret $secret_name not found in organization"
+            exit 1
+          fi
+          
+          # Get the actual secret value (requires GH CLI 2.20.0+)
+          secret_json=$(gh api \
+            -H "Accept: application/vnd.github.v3+json" \
+            "/orgs/$ORG/actions/secrets/$secret_name")
+          
+          echo "::add-mask::$secret_json"
+          echo "value=$(echo $secret_json | jq -r '.secret')" >> $GITHUB_OUTPUT
+
+      - name: Set Repository Secret
+        run: |
+          echo "${{ steps.get_secret.outputs.value }}" | \
+          gh secret set "${{ github.event.inputs.secret_name }}" \
+            --repo "${{ github.repository }}"
+
+      - name: Remove Org Secret (optional)
+        if: ${{ github.event.inputs.remove_from_org == 'true' }}
+        run: |
+          gh secret delete "${{ github.event.inputs.secret_name }}" \
+            --org "$ORG" \
+            --yes
