@@ -53,6 +53,13 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
           login-server: ${{ secrets.ACR_NAME }}.azurecr.io
 
+      - name: Extract image name without path
+        id: extract_name
+        run: |
+          # Extract the part after the last slash
+          IMAGE_NAME=$(basename "${{ inputs.image_name }}")
+          echo "simple_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
       - name: Determine final tag
         id: determine_tag
         run: |
@@ -71,4 +78,4 @@ jobs:
           file: ${{ inputs.dockerfile_path }}
           push: true
           tags: |
-            ${{ secrets.ACR_NAME }}.azurecr.io/${{ inputs.image_name }}:${{ steps.determine_tag.outputs.final_tag }}
+            ${{ secrets.ACR_NAME }}.azurecr.io/${{ steps.extract_name.outputs.simple_name }}:${{ steps.determine_tag.outputs.final_tag }}
