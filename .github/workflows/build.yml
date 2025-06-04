@@ -53,6 +53,17 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
           login-server: ${{ secrets.ACR_NAME }}.azurecr.io
 
+      - name: Determine final tag
+        id: determine_tag
+        run: |
+          if [ "${{ inputs.image_tag }}" = "main" ]; then
+            echo "final_tag=prod" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.image_tag }}" = "develop" ]; then
+            echo "final_tag=dev" >> $GITHUB_OUTPUT
+          else
+            echo "final_tag=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and push Docker image to ACR
         uses: docker/build-push-action@v5
         with:
@@ -60,4 +71,4 @@ jobs:
           file: ${{ inputs.dockerfile_path }}
           push: true
           tags: |
-            ${{ secrets.ACR_NAME }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.image_tag }}
+            ${{ secrets.ACR_NAME }}.azurecr.io/${{ inputs.image_name }}:${{ steps.determine_tag.outputs.final_tag }}
