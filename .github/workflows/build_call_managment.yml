@@ -27,11 +27,14 @@ jobs:
         BRANCHES=("main" "develop" "stage")
         ORG="microservices-final-project"
 
+        # Configure git globally
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
         for repo in "${REPOS[@]}"; do
           echo "🔄 Procesando repo: $repo"
-          git clone --quiet "https://${GH_PAT}@github.com/${ORG}/${repo}.git"
+          git clone --quiet "https://x-access-token:${GH_PAT}@github.com/${ORG}/${repo}.git"
           cd "$repo"
-          git remote set-url origin "https://${GH_PAT}@github.com/${ORG}/${repo}.git"
 
           for branch in "${BRANCHES[@]}"; do
             if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
@@ -42,11 +45,13 @@ jobs:
               mkdir -p .github/workflows
               cp ../call_templates/build_call.yml .github/workflows/build.yml
 
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
               git add .github/workflows/build.yml
-              git commit -m "chore: sync build.yml desde repo central" || echo "🔸 Nada que commitear"
-              git push origin "$branch"
+              if git diff-index --quiet HEAD --; then
+                echo "🔸 No hay cambios en $repo/$branch"
+              else
+                git commit -m "chore: sync build.yml desde repo central"
+                git push "https://x-access-token:${GH_PAT}@github.com/${ORG}/${repo}.git" "$branch"
+              fi
             else
               echo "⚠️ Rama $branch no existe en $repo. Saltando."
             fi
