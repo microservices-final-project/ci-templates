@@ -1,0 +1,56 @@
+name: Propagate build_call.yml to other repos
+
+on:
+  push:
+    paths:
+      - 'call_templates/build_call.yml'
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout this repo
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: sudo apt-get install -y jq
+
+    - name: Run propagation script
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+      run: |
+        #!/bin/bash
+        set -e
+
+        REPOS=("service-discovery" "cloud-config" "api-gateway" "proxy-client" "order-service" "payment-service" "product-service" "shipping-service" "user-service" "favourite-service")
+        BRANCHES=("main" "develop" "stage")
+        ORG="microservices-final-project"
+
+        for repo in "${REPOS[@]}"; do
+          echo "🔄 Procesando repo: $repo"
+          git clone --quiet "https://${GH_PAT}@github.com/${ORG}/${repo}.git"
+          cd "$repo"
+
+          for branch in "${BRANCHES[@]}"; do
+            if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+              echo "⏳ Procesando rama: $branch"
+              git checkout "$branch"
+              git pull origin "$branch"
+
+              mkdir -p .github/workflows
+              cp ../call_templates/build_call.yml .github/workflows/build.yml
+
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git add .github/workflows/build.yml
+              git commit -m "chore: sync build.yml desde repo central" || echo "🔸 Nada que commitear"
+              git push origin "$branch"
+            else
+              echo "⚠️ Rama $branch no existe en $repo. Saltando."
+            fi
+          done
+
+          cd ..
+          rm -rf "$repo"
+        done
