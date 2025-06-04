@@ -7,7 +7,7 @@ on:
       - main
       - stage
       - develop
-      - nest
+      - jest
 
 jobs:
   call-template:

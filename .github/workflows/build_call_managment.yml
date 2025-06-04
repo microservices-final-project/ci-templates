@@ -21,7 +21,7 @@ jobs:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
         #!/bin/bash
-        set -e
+        set -ex  # Enable debugging
 
         REPOS=("service-discovery" "cloud-config" "api-gateway" "proxy-client" "order-service" "payment-service" "product-service" "shipping-service" "user-service" "favourite-service")
         BRANCHES=("main" "develop" "stage")
@@ -32,13 +32,16 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
         for repo in "${REPOS[@]}"; do
-          echo "🔄 Procesando repo: $repo"
+          echo "🔄 Processing repo: $repo"
           git clone --quiet "https://x-access-token:${GH_PAT}@github.com/${ORG}/${repo}.git"
           cd "$repo"
+          
+          # Set the remote URL with PAT
+          git remote set-url origin "https://x-access-token:${GH_PAT}@github.com/${ORG}/${repo}.git"
 
           for branch in "${BRANCHES[@]}"; do
-            if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
-              echo "⏳ Procesando rama: $branch"
+            if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+              echo "⏳ Processing branch: $branch"
               git checkout "$branch"
               git pull origin "$branch"
 
@@ -46,14 +49,16 @@ jobs:
               cp ../call_templates/build_call.yml .github/workflows/build.yml
 
               git add .github/workflows/build.yml
-              if git diff-index --quiet HEAD --; then
-                echo "🔸 No hay cambios en $repo/$branch"
+              
+              if ! git diff-index --quiet HEAD --; then
+                git commit -m "chore: sync build.yml from central repo"
+                git push origin "$branch"
+                echo "✅ Successfully updated $repo/$branch"
               else
-                git commit -m "chore: sync build.yml desde repo central"
-                git push "https://x-access-token:${GH_PAT}@github.com/${ORG}/${repo}.git" "$branch"
+                echo "🔸 No changes in $repo/$branch"
               fi
             else
-              echo "⚠️ Rama $branch no existe en $repo. Saltando."
+              echo "⚠️ Branch $branch doesn't exist in $repo. Skipping."
             fi
           done
 
