@@ -31,6 +31,7 @@ jobs:
           echo "🔄 Procesando repo: $repo"
           git clone --quiet "https://${GH_PAT}@github.com/${ORG}/${repo}.git"
           cd "$repo"
+          git remote set-url origin "https://${GH_PAT}@github.com/${ORG}/${repo}.git"
 
           for branch in "${BRANCHES[@]}"; do
             if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
