@@ -11,11 +11,6 @@ on:
         required: false
         type: string
         default: '22'
-
-    secrets:
-      GH_PAT:
-        required: true
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -31,4 +26,4 @@ jobs:
 
       - run: npx semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
