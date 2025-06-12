@@ -1,0 +1,39 @@
+name: SonarQube Analysis
+
+on:
+  workflow_call:
+    inputs:
+      projectKey:
+        required: true
+        type: string
+      projectName:
+        required: false
+        type: string
+        default: ${{ github.repository }}
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 11 (compatible con tus microservicios)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Copy sonar-project.properties
+        run: |
+          cp $GITHUB_ACTION_PATH/../../sonar-project.properties .
+          sed -i "s/default-key/${{ inputs.projectKey }}/" sonar-project.properties
+          sed -i "s/default-name/${{ inputs.projectName }}/" sonar-project.properties
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        with:
+          projectBaseDir: .
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
