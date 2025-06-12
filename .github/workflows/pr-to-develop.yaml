@@ -1,4 +1,4 @@
-name: SonarQube Analysis
+name: CI Pipeline (PR to Develop Branch)
 
 on:
   workflow_call:
@@ -56,8 +56,11 @@ jobs:
           sed -i "s/default-key/${{ steps.sanitize.outputs.sanitized_project_key }}-${{ steps.sanitize.outputs.safe_branch_name }}/" sonar-project.properties
           sed -i "s/default-name/${{ steps.sanitize.outputs.sanitized_project_name }} (${{ steps.sanitize.outputs.safe_branch_name }})/" sonar-project.properties
 
-      - name: Build with tests and generate coverage
-        run: mvn clean verify
+      - name: Run Unit Tests
+        run: mvn test
+
+      - name: Run Integration Tests
+        run: mvn verify -DskipTests=false -Pintegration
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v2
@@ -66,3 +69,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Trivy Vulnerability Scanner (Filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          ignore-unfixed: true
