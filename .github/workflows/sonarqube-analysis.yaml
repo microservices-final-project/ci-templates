@@ -7,7 +7,6 @@ on:
         required: true
         type: string
         default: ${{ github.repository }}
-
       projectNameBase:
         required: false
         type: string
