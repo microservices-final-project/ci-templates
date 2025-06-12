@@ -29,9 +29,10 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Copy sonar-project.properties
+      - name: Download sonar-project.properties from ci-templates
         run: |
-          cp $GITHUB_ACTION_PATH/../../sonar-project.properties .
+          git clone --depth=1 https://github.com/microservices-final-project/ci-templates temp-templates
+          cp temp-templates/sonar-project.properties .
           sed -i "s/default-key/${{ inputs.projectKey }}/" sonar-project.properties
           sed -i "s/default-name/${{ inputs.projectName }}/" sonar-project.properties
 
