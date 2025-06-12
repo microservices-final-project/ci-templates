@@ -3,10 +3,10 @@ name: SonarQube Analysis
 on:
   workflow_call:
     inputs:
-      projectKey:
+      projectKeyBase:
         required: true
         type: string
-      projectName:
+      projectNameBase:
         required: false
         type: string
         default: ${{ github.repository }}
@@ -21,6 +21,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Sanitize branch name
+        id: sanitize
+        run: |
+          RAW_NAME="${{ github.head_ref }}"
+          SAFE_NAME=$(echo "$RAW_NAME" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+          echo "safe_branch_name=$SAFE_NAME" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -34,8 +41,8 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/microservices-final-project/ci-templates temp-templates
           cp temp-templates/sonar-project.properties .
-          sed -i "s/default-key/${{ inputs.projectKey }}/" sonar-project.properties
-          sed -i "s/default-name/${{ inputs.projectName }}/" sonar-project.properties
+          sed -i "s/default-key/${{ inputs.projectKeyBase }}-${{ steps.sanitize.outputs.safe_branch_name }}/" sonar-project.properties
+          sed -i "s/default-name/${{ inputs.projectNameBase }} (${{ steps.sanitize.outputs.safe_branch_name }})/" sonar-project.properties
 
       - name: Build with tests and generate coverage
         run: mvn clean verify
