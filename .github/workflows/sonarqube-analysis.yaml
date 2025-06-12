@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       projectKeyBase:
-        required: true
+        required: false
         type: string
         default: ${{ github.repository }}
       projectNameBase:
