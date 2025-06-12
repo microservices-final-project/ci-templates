@@ -19,11 +19,12 @@ on:
 jobs:
   sonar:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 11 (compatible con tus microservicios)
+      - name: Set up Java 11
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -35,6 +36,9 @@ jobs:
           cp temp-templates/sonar-project.properties .
           sed -i "s/default-key/${{ inputs.projectKey }}/" sonar-project.properties
           sed -i "s/default-name/${{ inputs.projectName }}/" sonar-project.properties
+
+      - name: Compile project (generate target/classes)
+        run: mvn clean compile
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v2
