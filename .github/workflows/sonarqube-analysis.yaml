@@ -22,12 +22,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Sanitize branch name
+      - name: Sanitize branch name, project key and name
         id: sanitize
         run: |
-          RAW_NAME="${{ github.head_ref }}"
-          SAFE_NAME=$(echo "$RAW_NAME" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
-          echo "safe_branch_name=$SAFE_NAME" >> $GITHUB_OUTPUT
+          RAW_BRANCH="${{ github.head_ref }}"
+          SAFE_BRANCH=$(echo "$RAW_BRANCH" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+
+          REPO_NAME=$(basename "${{ inputs.projectKeyBase }}")
+          PROJECT_KEY=$(echo "$REPO_NAME" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+
+          # Convert repo-name to "Repo Name"
+          PROJECT_NAME=$(echo "$REPO_NAME" | sed -E 's/[-_]/ /g' | sed -E 's/(^| )([a-z])/\U\2/g')
+
+          echo "safe_branch_name=$SAFE_BRANCH" >> $GITHUB_OUTPUT
+          echo "sanitized_project_key=$PROJECT_KEY" >> $GITHUB_OUTPUT
+          echo "sanitized_project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,8 +51,9 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/microservices-final-project/ci-templates temp-templates
           cp temp-templates/sonar-project.properties .
-          sed -i "s/default-key/${{ inputs.projectKeyBase }}-${{ steps.sanitize.outputs.safe_branch_name }}/" sonar-project.properties
-          sed -i "s/default-name/${{ inputs.projectNameBase }} (${{ steps.sanitize.outputs.safe_branch_name }})/" sonar-project.properties
+
+          sed -i "s/default-key/${{ steps.sanitize.outputs.sanitized_project_key }}-${{ steps.sanitize.outputs.safe_branch_name }}/" sonar-project.properties
+          sed -i "s/default-name/${{ steps.sanitize.outputs.sanitized_project_name }} (${{ steps.sanitize.outputs.safe_branch_name }})/" sonar-project.properties
 
       - name: Build with tests and generate coverage
         run: mvn clean verify
