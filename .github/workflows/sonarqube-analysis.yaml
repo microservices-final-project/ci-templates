@@ -37,8 +37,8 @@ jobs:
           sed -i "s/default-key/${{ inputs.projectKey }}/" sonar-project.properties
           sed -i "s/default-name/${{ inputs.projectName }}/" sonar-project.properties
 
-      - name: Compile project (generate target/classes)
-        run: mvn clean compile
+      - name: Build with tests and generate coverage
+        run: mvn clean verify
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v2
