@@ -2025,7 +2025,7 @@
 	"variable": [
 		{
 			"key": "url",
-			"value": "http://52.249.246.58:8080/app/api",
+			"value": "http://51.8.11.177:8080/app/api",
 			"type": "string"
 		},
 		{

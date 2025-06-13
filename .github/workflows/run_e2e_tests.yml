@@ -34,7 +34,7 @@ jobs:
       - name: Run ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0  # Usa una versión más reciente
         with:
-          target: 'http://52.249.246.58:8080'  # o la URL donde corre tu API Gateway
+          target: 'http://51.8.11.177:8080'  # o la URL donde corre tu API Gateway
           fail_action: false
 
       - name: Install Newman
