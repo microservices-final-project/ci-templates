@@ -66,7 +66,7 @@ jobs:
           if [ "${{ inputs.image_tag }}" = "main" ]; then
             echo "final_tag=prod" >> $GITHUB_OUTPUT
           elif [ "${{ inputs.image_tag }}" = "develop" ]; then
-            echo "final_tag=dev" >> $GITHUB_OUTPUT
+            echo "final_tag=stage" >> $GITHUB_OUTPUT
           else
             echo "final_tag=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
           fi
