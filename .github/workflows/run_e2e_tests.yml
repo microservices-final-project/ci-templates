@@ -21,12 +21,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.7.0
-        with:
-          target: 'http://52.249.246.58:8080'  # o la URL donde corre tu API Gateway
-          fail_action: false
-
       - name: Install k6
         run: |
           curl -s https://dl.k6.io/key.gpg | sudo apt-key add -
@@ -36,6 +30,12 @@ jobs:
 
       - name: Run performance test
         run: k6 run ./tests/performance/load-test.js
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: 'http://52.249.246.58:8080'  # o la URL donde corre tu API Gateway
+          fail_action: false
 
       - name: Install Newman
         run: npm install -g newman
