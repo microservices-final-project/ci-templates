@@ -31,8 +31,8 @@ jobs:
       - name: Run performance test
         run: k6 run ./tests/performance/load-test.js
 
-      - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.7.0
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0  # Usa una versión más reciente
         with:
           target: 'http://52.249.246.58:8080'  # o la URL donde corre tu API Gateway
           fail_action: false
