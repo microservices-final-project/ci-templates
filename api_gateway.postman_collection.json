@@ -2025,7 +2025,7 @@
 	"variable": [
 		{
 			"key": "url",
-			"value": "https://stage.ticktopia.shop/app/api",
+			"value": "http://52.249.246.58:8080/app/api",
 			"type": "string"
 		},
 		{
