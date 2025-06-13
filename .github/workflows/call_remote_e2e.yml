@@ -14,7 +14,7 @@ jobs:
       GH_TK: ${{ secrets.GH_PAT }}
       REPO: microservices-final-project/ci-templates
       BRANCH: main
-      WORKFLOW_FILE: run_e2e_test.yml
+      WORKFLOW_FILE: run_e2e_tests.yml
       GH_WAIT_INTERVAL: 10
 
     steps:
