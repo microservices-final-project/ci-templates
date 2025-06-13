@@ -11,7 +11,7 @@ jobs:
   call-remote-e2e:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GH_PAT }}
+      GH_TK: ${{ secrets.GH_PAT }}
       REPO: microservices-final-project/ci-templates
       BRANCH: main
       WORKFLOW_FILE: run_e2e_test.yml
@@ -25,7 +25,7 @@ jobs:
 
       - name: Authenticate GH CLI
         run: |
-          echo "$GH_TOKEN" | gh auth login --with-token
+          echo "$GH_TK" | gh auth login --with-token
 
       - name: Trigger remote workflow
         id: trigger
