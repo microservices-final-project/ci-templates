@@ -15,6 +15,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Run OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.7.0
@@ -22,6 +27,15 @@ jobs:
           target: 'http://52.249.246.58:8080'  # o la URL donde corre tu API Gateway
           fail_action: false
 
+      - name: Install k6
+        run: |
+          curl -s https://dl.k6.io/key.gpg | sudo apt-key add -
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt update
+          sudo apt install -y k6
+
+      - name: Run performance test
+        run: k6 run ./tests/performance/load-test.js
 
       - name: Install Newman
         run: npm install -g newman
