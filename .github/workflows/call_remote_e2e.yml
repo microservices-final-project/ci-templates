@@ -1,0 +1,73 @@
+name: Call Remote E2E Test and Wait
+
+on:
+  workflow_call:
+    inputs: {}
+    secrets:
+      GH_PAT:
+        required: true
+
+jobs:
+  call-remote-e2e:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_PAT }}
+      REPO: microservices-final-project/ci-templates
+      BRANCH: main
+      WORKFLOW_FILE: run_e2e_test.yml
+      GH_WAIT_INTERVAL: 10
+
+    steps:
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh jq
+
+      - name: Authenticate GH CLI
+        run: |
+          echo "$GH_TOKEN" | gh auth login --with-token
+
+      - name: Trigger remote workflow
+        id: trigger
+        run: |
+          echo "🚀 Triggering $WORKFLOW_FILE in $REPO on branch $BRANCH..."
+          gh workflow run "$WORKFLOW_FILE" \
+            --ref "$BRANCH" \
+            --repo "$REPO"
+
+          echo "⏳ Waiting for the workflow to register..."
+          sleep 5
+
+          echo "🔎 Fetching workflow run ID..."
+          RUN_ID=$(gh run list --repo "$REPO" --workflow="$WORKFLOW_FILE" --json databaseId,headBranch,status \
+            | jq -r '.[] | select(.headBranch=="'"$BRANCH"'") | .databaseId' | head -n 1)
+
+          if [ -z "$RUN_ID" ]; then
+            echo "❌ Could not find a recent run for $WORKFLOW_FILE on $BRANCH"
+            exit 1
+          fi
+
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "✅ Triggered run with ID: $RUN_ID"
+
+      - name: Poll until run completes
+        run: |
+          echo "🔁 Polling run $RUN_ID in $REPO..."
+          for i in {1..60}; do
+            STATUS=$(gh run view "$RUN_ID" --repo "$REPO" --json status,conclusion -q '.status')
+            CONCLUSION=$(gh run view "$RUN_ID" --repo "$REPO" --json status,conclusion -q '.conclusion')
+            echo "⏱️ Attempt $i - Status: $STATUS | Conclusion: $CONCLUSION"
+            if [ "$STATUS" == "completed" ]; then
+              if [ "$CONCLUSION" == "success" ]; then
+                echo "✅ Remote workflow succeeded!"
+                exit 0
+              else
+                echo "❌ Remote workflow failed with conclusion: $CONCLUSION"
+                exit 1
+              fi
+            fi
+            sleep $GH_WAIT_INTERVAL
+          done
+
+          echo "❌ Timed out waiting for remote workflow to complete"
+          exit 1

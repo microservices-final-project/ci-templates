@@ -1,0 +1,24 @@
+name: Run Postman Tests with Newman
+
+on:
+  workflow_dispatch:
+
+jobs:
+  postman-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Newman collection with environment variable
+        run: |
+          newman run api_gateway.postman_collection.json

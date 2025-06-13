@@ -1,0 +1,2044 @@
+{
+	"info": {
+		"_postman_id": "7467f68e-770a-45f0-abff-a8b990c6355f",
+		"name": "Api Gateway",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38775841"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "LOGIN AS USER",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test for status code\r",
+									"pm.expect(pm.response.code).to.equal(200);\r",
+									"\r",
+									"// Test for content type\r",
+									"pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"\r",
+									"// Test for jwtToken existence\r",
+									"const response = pm.response.json();\r",
+									"pm.expect(response).to.have.property('jwtToken');\r",
+									"pm.expect(response.jwtToken).to.be.a('string');\r",
+									"pm.collectionVariables.set(\"userToken\", pm.response.json().jwtToken);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"kofi\",\r\n    \"password\": \"Hola1597!!!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/authenticate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN AS OTHER USER",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"otheruserToken\", pm.response.json().jwtToken);\r",
+									"pm.expect(pm.response.code).to.equal(200);\r",
+									"\r",
+									"// Test for content type\r",
+									"pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"\r",
+									"// Test for jwtToken existence\r",
+									"const response = pm.response.json();\r",
+									"pm.expect(response).to.have.property('jwtToken');\r",
+									"pm.expect(response.jwtToken).to.be.a('string');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"user\",\r\n    \"password\": \"Hola1597!!!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/authenticate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN AS ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"adminToken\", pm.response.json().jwtToken);\r",
+									"pm.expect(pm.response.code).to.equal(200);\r",
+									"\r",
+									"// Test for content type\r",
+									"pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+									"\r",
+									"// Test for jwtToken existence\r",
+									"const response = pm.response.json();\r",
+									"pm.expect(response).to.have.property('jwtToken');\r",
+									"pm.expect(response.jwtToken).to.be.a('string');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"alejo\",\r\n    \"password\": \"Hola1597!!!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/authenticate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UserService",
+			"item": [
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "GET ALL USERS",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const response = pm.response.json();\r",
+													"\r",
+													"// Test for status code\r",
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"// Test for response time\r",
+													"pm.test(\"Response time is less than 500ms\", () => {\r",
+													"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+													"});\r",
+													"\r",
+													"// Test for response body schema\r",
+													"pm.test(\"Response body schema is valid\", () => {\r",
+													"    pm.expect(response).to.have.property(\"collection\").that.is.an(\"array\");\r",
+													"    response.collection.forEach(user => {\r",
+													"        pm.expect(user).to.have.all.keys(\"userId\", \"firstName\", \"lastName\", \"imageUrl\", \"email\", \"phone\", \"credential\");\r",
+													"        pm.expect(user.credential).to.have.all.keys(\"credentialId\", \"username\", \"password\", \"roleBasedAuthority\", \"isEnabled\", \"isAccountNonExpired\", \"isAccountNonLocked\", \"isCredentialsNonExpired\");\r",
+													"    });\r",
+													"});\r",
+													"\r",
+													"// Test for content-type header\r",
+													"pm.test(\"Content-Type is application/json\", () => {\r",
+													"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": \"kofi\",\r\n    \"password\": \"Hola1597!!!\"\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/users",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET USER BY ID",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"// Basic structure checks for the response body\r",
+													"pm.test(\"Response body is not empty\", function () {\r",
+													"    pm.expect(pm.response.json()).to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{otheruserToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/users/7",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users",
+												"7"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET USER NOT ME",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const response = pm.response.json();\r",
+													"\r",
+													"// Test for status code\r",
+													"pm.test('Status code is 401', () => {\r",
+													"    pm.expect(pm.response.code).to.equal(401);\r",
+													"});\r",
+													"\r",
+													"// Test for response body properties\r",
+													"pm.test('Response body has required properties', () => {\r",
+													"    pm.expect(response).to.have.property('timestamp');\r",
+													"    pm.expect(response).to.have.property('httpStatus');\r",
+													"    pm.expect(response).to.have.property('msg');\r",
+													"});\r",
+													"\r",
+													"// Test for content type\r",
+													"pm.test('Content-Type is application/json', () => {\r",
+													"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{otheruserToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/users/6",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users",
+												"6"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "REGISTER USER",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"UserId is a non-negative integer\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.have.property('userId');\r",
+													"    pm.expect(responseData.userId).to.be.a('number').and.to.be.at.least(0);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Email is in a valid format\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.email).to.exist;\r",
+													"    pm.expect(responseData.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, \"Email format is invalid\");\r",
+													"});\r",
+													"\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response matches the expected schema structure\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('userId', 'firstName', 'lastName', 'imageUrl', 'email', 'phone');\r",
+													"    \r",
+													"    pm.expect(responseData.userId).to.be.a('number');\r",
+													"    pm.expect(responseData.firstName).to.be.a('string');\r",
+													"    pm.expect(responseData.lastName).to.be.a('string');\r",
+													"    pm.expect(responseData.imageUrl).to.be.a('string');\r",
+													"    pm.expect(responseData.email).to.be.a('string').that.matches(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, \"Email format is invalid\");\r",
+													"    pm.expect(responseData.phone).to.be.a('string');\r",
+													"});\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"firstName\": \"Alejndsdsadsro\",\r\n    \"lastName\": \"Cordoba\",\r\n    \"imageUrl\": \"{{$randomUrl}}\",\r\n    \"email\": \"prueba@example.com\",\r\n    \"phone\": \"{{$randomPhoneNumber}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/users",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "PUT",
+							"item": [
+								{
+									"name": "UPDATE USER AS ADMIN",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"firstName\": \"AlejndsdDASDsadsro\",\r\n    \"lastName\": \"Cordoba\",\r\n    \"imageUrl\": \"{{$randomUrl}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"addressDtos\": [\r\n        {\r\n            \"fullAddress\": \"123 Main St\",\r\n            \"postalCode\": \"12345\",\r\n            \"city\": \"New York\"\r\n        }\r\n    ],\r\n    \"credential\": {\r\n        \"username\": \"johndoe\",\r\n        \"password\": \"securePassword123\",\r\n        \"roleBasedAuthority\": \"ROLE_USER\",\r\n        \"isEnabled\": true,\r\n        \"isAccountNonExpired\": true,\r\n        \"isAccountNonLocked\": true,\r\n        \"isCredentialsNonExpired\": true\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/users/1",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users",
+												"1"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "UPDATE USER AS ME",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response time is less than 200ms\", function () {\r",
+													"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response matches the expected schema\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"\r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('userId', 'firstName', 'lastName', 'imageUrl', 'email', 'phone', 'credential');\r",
+													"    \r",
+													"    pm.expect(responseData.userId).to.be.a('number');\r",
+													"    pm.expect(responseData.firstName).to.be.a('string');\r",
+													"    pm.expect(responseData.lastName).to.be.a('string');\r",
+													"    pm.expect(responseData.imageUrl).to.be.a('string');\r",
+													"    pm.expect(responseData.email).to.be.a('string').that.matches(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r",
+													"    pm.expect(responseData.phone).to.satisfy(value => value === null || typeof value === 'string');\r",
+													"\r",
+													"    pm.expect(responseData.credential).to.be.an('object');\r",
+													"    pm.expect(responseData.credential).to.have.all.keys('credentialId', 'username', 'password', 'roleBasedAuthority', 'isEnabled', 'isAccountNonExpired', 'isAccountNonLocked', 'isCredentialsNonExpired');\r",
+													"    \r",
+													"    pm.expect(responseData.credential.credentialId).to.be.a('number');\r",
+													"    pm.expect(responseData.credential.username).to.be.a('string');\r",
+													"    pm.expect(responseData.credential.password).to.be.a('string');\r",
+													"    pm.expect(responseData.credential.roleBasedAuthority).to.be.a('string');\r",
+													"    pm.expect(responseData.credential.isEnabled).to.be.a('boolean');\r",
+													"    pm.expect(responseData.credential.isAccountNonExpired).to.be.a('boolean');\r",
+													"    pm.expect(responseData.credential.isAccountNonLocked).to.be.a('boolean');\r",
+													"    pm.expect(responseData.credential.isCredentialsNonExpired).to.be.a('boolean');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Email is in a valid format\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.email).to.exist;\r",
+													"    pm.expect(responseData.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, \"Email format is invalid\");\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Phone is either null or in a valid format\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.phone).to.satisfy(function(phone) {\r",
+													"        return phone === null || /^\\\\+?[1-9]\\\\d{1,14}$/.test(phone);\r",
+													"    }, \"Phone must be either null or in a valid format\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"firstName\": \"AlejndsdDASDsadsro\",\r\n    \"lastName\": \"Cordoba\",\r\n    \"imageUrl\": \"{{$randomUrl}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"addressDtos\": [\r\n        {\r\n            \"fullAddress\": \"123 Main St\",\r\n            \"postalCode\": \"12345\",\r\n            \"city\": \"New York\"\r\n        }\r\n    ],\r\n    \"credential\": {\r\n        \"username\": \"johndoe\",\r\n        \"password\": \"securePassword123\",\r\n        \"roleBasedAuthority\": \"ROLE_USER\",\r\n        \"isEnabled\": true,\r\n        \"isAccountNonExpired\": true,\r\n        \"isAccountNonLocked\": true,\r\n        \"isCredentialsNonExpired\": true\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/users/5",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users",
+												"5"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "UPDATE USER AS NOT ME",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 401\", function () {\r",
+													"    pm.response.to.have.status(401);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response has correct content type\", function () {\r",
+													"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response body contains expected fields\", function () {\r",
+													"    const response = pm.response.json();\r",
+													"    pm.expect(response).to.have.property(\"timestamp\");\r",
+													"    pm.expect(response).to.have.property(\"httpStatus\").that.equals(\"UNAUTHORIZED\");\r",
+													"    pm.expect(response).to.have.property(\"msg\").that.equals(\"You can access to resources of your own\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"firstName\": \"AlejndsdDASDsadsro\",\r\n    \"lastName\": \"Cordoba\",\r\n    \"imageUrl\": \"{{$randomUrl}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"addressDtos\": [\r\n        {\r\n            \"fullAddress\": \"123 Main St\",\r\n            \"postalCode\": \"12345\",\r\n            \"city\": \"New York\"\r\n        }\r\n    ],\r\n    \"credential\": {\r\n        \"username\": \"johndoe\",\r\n        \"password\": \"securePassword123\",\r\n        \"roleBasedAuthority\": \"ROLE_USER\",\r\n        \"isEnabled\": true,\r\n        \"isAccountNonExpired\": true,\r\n        \"isAccountNonLocked\": true,\r\n        \"isCredentialsNonExpired\": true\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/users/6",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users",
+												"6"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "DELETE",
+							"item": [
+								{
+									"name": "init",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": \"kofiSSS\",\r\n    \"password\": \"Hola1597!!!\",\r\n    \"roleBasedAuthority\": \"ROLE_USER\",\r\n    \"isEnabled\": true,\r\n    \"isAccountNonExpired\": true,\r\n    \"isAccountNonLocked\": true,\r\n    \"isCredentialsNonExpired\": true,\r\n    \"user\": {\r\n        \"userId\": \"8\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/credentials",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "DELETE USER AS ADMIN",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userId\": \"4\",\r\n    \"firstName\": \"AlejndsdDASDsadsro\",\r\n    \"lastName\": \"Cordoba\",\r\n    \"imageUrl\": \"{{$randomUrl}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"addressDtos\": [\r\n        {\r\n            \"fullAddress\": \"123 Main St\",\r\n            \"postalCode\": \"12345\",\r\n            \"city\": \"New York\"\r\n        }\r\n    ],\r\n    \"credential\": {\r\n        \"username\": \"johndoe\",\r\n        \"password\": \"securePassword123\",\r\n        \"roleBasedAuthority\": \"ROLE_USER\",\r\n        \"isEnabled\": true,\r\n        \"isAccountNonExpired\": true,\r\n        \"isAccountNonLocked\": true,\r\n        \"isCredentialsNonExpired\": true\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/users/8",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"users",
+												"8"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Address",
+					"item": [
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "GET ALL ADDRESSES",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGVqbyIsImV4cCI6MTc0OTgyMjE4MiwidXNlcklkIjoiNiIsImlhdCI6MTc0OTc4NjE4Mn0.6mcs--C2rTIY5H3-RuA4eJmGeocdwD3UHlA1sLgtttE",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"addressId\": 123,\r\n  \"fullAddress\": \"123 Main Street\",\r\n  \"postalCode\": \"12345\",\r\n  \"city\": \"Springfield\",\r\n  \"user\": {\r\n    \"userId\": 1\r\n  }\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{url}}/address",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"address"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET ADDRESS BY ID",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrb2ZpIiwiZXhwIjoxNzQ5ODIyMjQyLCJ1c2VySWQiOiI1IiwiaWF0IjoxNzQ5Nzg2MjQyfQ.zdKzIiZS4QqCpcFKhVCJXRM_DcUe7goQ5WhivdV3nPw",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/address/7",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"address",
+												"7"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "CREATE ADDRESS",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrb2ZpIiwiZXhwIjoxNzQ5ODIyMjQyLCJ1c2VySWQiOiI1IiwiaWF0IjoxNzQ5Nzg2MjQyfQ.zdKzIiZS4QqCpcFKhVCJXRM_DcUe7goQ5WhivdV3nPw",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"addressId\": 123,\r\n  \"fullAddress\": \"123 Main Street\",\r\n  \"postalCode\": \"12345\",\r\n  \"city\": \"Springfield\",\r\n  \"user\": {\r\n    \"userId\": 5\r\n  }\r\n}\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/address",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"address"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "PUT",
+							"item": [
+								{
+									"name": "UPDATE ADDRESS",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrb2ZpIiwiZXhwIjoxNzQ5ODIyMjQyLCJ1c2VySWQiOiI1IiwiaWF0IjoxNzQ5Nzg2MjQyfQ.zdKzIiZS4QqCpcFKhVCJXRM_DcUe7goQ5WhivdV3nPw",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"addressId\": 123,\r\n  \"fullAddress\": \"123 MaiSDADSn Street\",\r\n  \"postalCode\": \"12345\",\r\n  \"city\": \"Springfield\"\r\n}\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/address/7",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"address",
+												"7"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "DELETE",
+							"item": [
+								{
+									"name": "DELETE ADDRESS",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrb2ZpIiwiZXhwIjoxNzQ5ODIyMjQyLCJ1c2VySWQiOiI1IiwiaWF0IjoxNzQ5Nzg2MjQyfQ.zdKzIiZS4QqCpcFKhVCJXRM_DcUe7goQ5WhivdV3nPw",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"addressId\": 123,\r\n  \"fullAddress\": \"123 MaiSDADSn Street\",\r\n  \"postalCode\": \"12345\",\r\n  \"city\": \"Springfield\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{url}}/address/1",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"address",
+												"1"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Credentials",
+					"item": [
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "GET ALL CREDENTIALS AS ADMIN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response time is less than 200ms\", function () {\r",
+													"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response schema matches the expected structure\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.property('collection').that.is.an('array');\r",
+													"    \r",
+													"    responseData.collection.forEach(function(item) {\r",
+													"        pm.expect(item).to.have.all.keys('credentialId', 'username', 'password', 'roleBasedAuthority', 'isEnabled', 'isAccountNonExpired', 'isAccountNonLocked', 'isCredentialsNonExpired', 'user');\r",
+													"        pm.expect(item.user).to.have.all.keys('userId', 'firstName', 'lastName', 'imageUrl', 'email', 'phone');\r",
+													"        pm.expect(item.credentialId).to.be.a('number');\r",
+													"        pm.expect(item.isEnabled).to.be.a('boolean');\r",
+													"        pm.expect(item.isAccountNonExpired).to.be.a('boolean');\r",
+													"        pm.expect(item.isAccountNonLocked).to.be.a('boolean');\r",
+													"        pm.expect(item.isCredentialsNonExpired).to.be.a('boolean');\r",
+													"        pm.expect(item.user.userId).to.be.a('number');\r",
+													"        pm.expect(item.user.email).to.be.a('string');\r",
+													"    });\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"The collection array must contain at least one element\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.collection).to.be.an('array').that.is.not.empty;\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Username and Password must be non-empty strings\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"\r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.collection).to.be.an('array').that.is.not.empty;\r",
+													"\r",
+													"    responseData.collection.forEach(function (credential) {\r",
+													"        pm.expect(credential.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");\r",
+													"        pm.expect(credential.password).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Password should not be empty\");\r",
+													"    });\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"addressId\": 123,\r\n  \"fullAddress\": \"123 MaiSDADSn Street\",\r\n  \"postalCode\": \"12345\",\r\n  \"city\": \"Springfield\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{url}}/credentials",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET ALL CREDENTIALS AS NOT ADMIN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 403\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(403);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response contains required fields\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('timestamp', 'status', 'error', 'path');\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Error message must be a non-empty string\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.error).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Error message should not be empty\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"addressId\": 123,\r\n  \"fullAddress\": \"123 MaiSDADSn Street\",\r\n  \"postalCode\": \"12345\",\r\n  \"city\": \"Springfield\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{url}}/credentials",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "CREATE CREDENTIALS",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrb2ZpIiwiZXhwIjoxNzQ5ODIyMjQyLCJ1c2VySWQiOiI1IiwiaWF0IjoxNzQ5Nzg2MjQyfQ.zdKzIiZS4QqCpcFKhVCJXRM_DcUe7goQ5WhivdV3nPw",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": \"kofiS\",\r\n    \"password\": \"Hola1597!!!\",\r\n    \"roleBasedAuthority\": \"ROLE_USER\",\r\n    \"isEnabled\": true,\r\n    \"isAccountNonExpired\": true,\r\n    \"isAccountNonLocked\": true,\r\n    \"isCredentialsNonExpired\": true,\r\n    \"user\": {\r\n        \"userId\": \"6\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/credentials",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "DELETE",
+							"item": [
+								{
+									"name": "DELETE CREDENTIALS",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": \"kofiS\",\r\n    \"password\": \"Hola1597!!!\",\r\n    \"roleBasedAuthority\": \"ROLE_USER\",\r\n    \"isEnabled\": true,\r\n    \"isAccountNonExpired\": true,\r\n    \"isAccountNonLocked\": true,\r\n    \"isCredentialsNonExpired\": true,\r\n    \"user\": {\r\n        \"userId\": \"6\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/credentials/2",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials",
+												"2"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "PUT",
+							"item": [
+								{
+									"name": "UPDATE CREDENTIALS BY QUERY",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrb2ZpIiwiZXhwIjoxNzQ5ODI0MzY2LCJ1c2VySWQiOiI1IiwiaWF0IjoxNzQ5Nzg4MzY2fQ.qux_QIJUfuzBNH8AlIj_sBXg8ZVj1sHkByGnc9Iz1_w",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"credentialId\": \"1\",\r\n    \"username\": \"johndsdoe\",\r\n    \"password\": \"securePassword123\",\r\n    \"roleBasedAuthority\": \"ROLE_USER\",\r\n    \"isEnabled\": true,\r\n    \"isAccountNonExpired\": true,\r\n    \"isAccountNonLocked\": true,\r\n    \"isCredentialsNonExpired\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/credentials/5",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials",
+												"5"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "UPDATE CREDENTIALS BY QUERY NOT FOUND",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huZHNkb2UiLCJleHAiOjE3NDk4MjQ0NzEsInVzZXJJZCI6IjUiLCJpYXQiOjE3NDk3ODg0NzF9.N5Kp3q2v0DCr3evLtvFwlAdOOrcPsTKWGWqq0EsO0so",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"credentialId\": \"1\",\r\n    \"username\": \"johndsdoe\",\r\n    \"password\": \"securePassword123\",\r\n    \"roleBasedAuthority\": \"ROLE_USER\",\r\n    \"isEnabled\": true,\r\n    \"isAccountNonExpired\": true,\r\n    \"isAccountNonLocked\": true,\r\n    \"isCredentialsNonExpired\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/credentials/9865",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"credentials",
+												"9865"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "VerificationToken",
+					"item": [
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "GET ALL VERIFICATION TOKENS AS ADMIN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response has required fields\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.property('collection').that.is.an('array').that.is.not.empty;\r",
+													"\r",
+													"    responseData.collection.forEach(item => {\r",
+													"        pm.expect(item).to.have.all.keys('verificationTokenId', 'token', 'expireDate', 'credential');\r",
+													"        pm.expect(item.verificationTokenId).to.be.a('number');\r",
+													"        pm.expect(item.token).to.be.a('string');\r",
+													"        pm.expect(item.expireDate).to.be.a('string'); // Assuming expireDate is in string format\r",
+													"        pm.expect(item.credential).to.be.an('object').that.has.all.keys('credentialId', 'username', 'password', 'roleBasedAuthority', 'isEnabled', 'isAccountNonExpired', 'isAccountNonLocked', 'isCredentialsNonExpired');\r",
+													"    });\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Validate the structure of the credential object\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.collection).to.be.an('array').that.is.not.empty;\r",
+													"\r",
+													"    responseData.collection.forEach(function(item) {\r",
+													"        pm.expect(item.credential).to.be.an('object');\r",
+													"        pm.expect(item.credential).to.have.all.keys('credentialId', 'username', 'password', 'roleBasedAuthority', 'isEnabled', 'isAccountNonExpired', 'isAccountNonLocked', 'isCredentialsNonExpired');\r",
+													"        \r",
+													"        pm.expect(item.credential.credentialId).to.be.a('number');\r",
+													"        pm.expect(item.credential.username).to.be.a('string').that.is.not.empty;\r",
+													"        pm.expect(item.credential.password).to.be.a('string').that.is.not.empty;\r",
+													"        pm.expect(item.credential.roleBasedAuthority).to.be.a('string').that.is.not.empty;\r",
+													"        pm.expect(item.credential.isEnabled).to.be.a('boolean');\r",
+													"        pm.expect(item.credential.isAccountNonExpired).to.be.a('boolean');\r",
+													"        pm.expect(item.credential.isAccountNonLocked).to.be.a('boolean');\r",
+													"        pm.expect(item.credential.isCredentialsNonExpired).to.be.a('boolean');\r",
+													"    });\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/verificationTokens",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"verificationTokens"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET ALL VERIFICATION TOKENS AS NOT ADMIN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 403\", function () {\r",
+													"    pm.expect(pm.response.code).to.eql(403);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response contains the correct Content-Type header\", function () {\r",
+													"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json\");\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Validate the structure of the response JSON schema\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('timestamp', 'status', 'error', 'path');\r",
+													"\r",
+													"    pm.expect(responseData.timestamp).to.be.a('string');\r",
+													"    pm.expect(responseData.status).to.be.a('number');\r",
+													"    pm.expect(responseData.error).to.be.a('string');\r",
+													"    pm.expect(responseData.path).to.be.a('string');\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Ensure required fields are present in the response\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('timestamp', 'status', 'error', 'path');\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/verificationTokens",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"verificationTokens"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "CREATE VERIFICATION TOKEN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Validate the schema of the response\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object').that.includes.keys('verificationTokenId', 'token', 'expireDate', 'credential');\r",
+													"    pm.expect(responseData.credential).to.be.an('object').that.includes.keys('credentialId', 'username', 'password', 'roleBasedAuthority', 'isEnabled', 'isAccountNonExpired', 'isAccountNonLocked', 'isCredentialsNonExpired');\r",
+													"\r",
+													"    pm.expect(responseData.verificationTokenId).to.be.a('number');\r",
+													"    pm.expect(responseData.token).to.be.a('string');\r",
+													"    pm.expect(responseData.expireDate).to.be.a('string');\r",
+													"    \r",
+													"    pm.expect(responseData.credential.credentialId).to.be.a('number');\r",
+													"    pm.expect(responseData.credential.username).to.be.a('string');\r",
+													"    pm.expect(responseData.credential.password).to.be.a('string');\r",
+													"    pm.expect(responseData.credential.roleBasedAuthority).to.be.a('string');\r",
+													"    pm.expect(responseData.credential.isEnabled).to.be.a('boolean');\r",
+													"    pm.expect(responseData.credential.isAccountNonExpired).to.be.a('boolean');\r",
+													"    pm.expect(responseData.credential.isAccountNonLocked).to.be.a('boolean');\r",
+													"    pm.expect(responseData.credential.isCredentialsNonExpired).to.be.a('boolean');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"The credential object contains all required fields\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.credential).to.exist.and.to.be.an('object');\r",
+													"    \r",
+													"    const credential = responseData.credential;\r",
+													"    pm.expect(credential).to.have.all.keys('credentialId', 'username', 'password', 'roleBasedAuthority', 'isEnabled', 'isAccountNonExpired', 'isAccountNonLocked', 'isCredentialsNonExpired');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Token is a non-empty string\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.token).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"verificationTokenId\": 1,\r\n  \"token\": \"abc123def456\",\r\n  \"expireDate\": \"30-06-2025\",\r\n  \"credential\": {\r\n    \"credentialId\": 5\r\n  }\r\n}\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/verificationTokens",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"verificationTokens"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "PUT",
+							"item": [
+								{
+									"name": "DELETE TOKEN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response should be a boolean value\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.a('boolean');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response content-type is application/json\", function () {\r",
+													"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response schema should be a boolean\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    pm.expect(responseData).to.be.a('boolean');\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/verificationTokens/5",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"verificationTokens",
+												"5"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "ProductService",
+			"item": [
+				{
+					"name": "Product",
+					"item": [
+						{
+							"name": "DELETE",
+							"item": [
+								{
+									"name": "DELETE PRODUCT AS ADMIN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response content type is application/json\", function () {\r",
+													"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response body is a boolean value\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    pm.expect(responseData).to.be.a('boolean');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response indicates successful deletion of the resource\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    pm.expect(responseData).to.be.true;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"productTitle\": \"asssus\",\r\n    \"imageUrl\": \"xxx\",\r\n    \"sku\": \"dfqejklejrkn\",\r\n    \"priceUnit\": 0.0,\r\n    \"quantity\": 50,\r\n    \"category\": {\r\n        \"categoryId\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/products/2",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"products",
+												"2"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "DELETE PRODUCT AS USER",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 403\", function () {\r",
+													"    pm.expect(pm.response.code).to.equal(403);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response content type is application/json\", function () {\r",
+													"    pm.expect(pm.response.headers.get('Content-Type')).to.include(\"application/json\");\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response contains required fields\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('timestamp', 'status', 'error', 'path');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Status field is a number and not negative\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.have.property('status').that.is.a('number').and.is.at.least(0);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"productTitle\": \"asssus\",\r\n    \"imageUrl\": \"xxx\",\r\n    \"sku\": \"dfqejklejrkn\",\r\n    \"priceUnit\": 0.0,\r\n    \"quantity\": 50,\r\n    \"category\": {\r\n        \"categoryId\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/products/1",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"products",
+												"1"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "CREATE PRODUCT AS ADMIN",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.eql(200);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response matches the expected schema\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('productId', 'productTitle', 'imageUrl', 'sku', 'priceUnit', 'quantity', 'category');\r",
+													"    \r",
+													"    pm.expect(responseData.productId).to.be.a('number');\r",
+													"    pm.expect(responseData.productTitle).to.be.a('string');\r",
+													"    pm.expect(responseData.imageUrl).to.be.a('string');\r",
+													"    pm.expect(responseData.sku).to.be.a('string');\r",
+													"    pm.expect(responseData.priceUnit).to.be.a('number');\r",
+													"    pm.expect(responseData.quantity).to.be.a('number');\r",
+													"    \r",
+													"    pm.expect(responseData.category).to.be.an('object');\r",
+													"    pm.expect(responseData.category).to.have.all.keys('categoryId', 'categoryTitle', 'imageUrl');\r",
+													"    pm.expect(responseData.category.categoryId).to.be.a('number');\r",
+													"    pm.expect(responseData.category.categoryTitle).to.satisfy(value => value === null || typeof value === 'string');\r",
+													"    pm.expect(responseData.category.imageUrl).to.satisfy(value => value === null || typeof value === 'string');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"ProductId is a non-negative integer\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.have.property('productId');\r",
+													"    pm.expect(responseData.productId).to.be.a('number').and.to.be.at.least(0);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"PriceUnit and Quantity are non-negative integers\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.have.property('priceUnit').that.is.a('number').and.is.at.least(0);\r",
+													"    pm.expect(responseData).to.have.property('quantity').that.is.a('number').and.is.at.least(0);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"productTitle\": \"asssus\",\r\n    \"imageUrl\": \"xxx\",\r\n    \"sku\": \"dfqejklejrkn\",\r\n    \"priceUnit\": 0.0,\r\n    \"quantity\": 50,\r\n    \"category\": {\r\n        \"categoryId\": 1\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/products",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"products"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "CREATE PRODUCT AS USER",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 403\", function () {\r",
+													"    pm.expect(pm.response.code).to.eql(403);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Response has required fields\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('timestamp', 'status', 'error', 'path');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Status is of type integer\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.status).to.be.a('number');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Error must be a non-empty string\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.error).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{userToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"productTitle\": \"asssus\",\r\n    \"imageUrl\": \"xxx\",\r\n    \"sku\": \"dfqejklejrkn\",\r\n    \"priceUnit\": 0.0,\r\n    \"quantity\": 50,\r\n    \"category\": {\r\n        \"categoryId\": 1\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/products",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"products"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "GET ALL PRODUCTS",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"\r",
+													"pm.test(\"Response contains required fields in the collection\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData.collection).to.be.an('array').that.is.not.empty;\r",
+													"\r",
+													"    responseData.collection.forEach(function(product) {\r",
+													"        pm.expect(product).to.have.all.keys('productId', 'productTitle', 'imageUrl', 'sku', 'priceUnit', 'quantity', 'category');\r",
+													"    });\r",
+													"});\r",
+													"\r",
+													"\r",
+													"\r",
+													"\r",
+													"\r",
+													"pm.test(\"PriceUnit and quantity must be non-negative integers\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    \r",
+													"    responseData.collection.forEach(function(product) {\r",
+													"        pm.expect(product.priceUnit).to.be.a('number').and.to.be.at.least(0, \"PriceUnit should be a non-negative integer\");\r",
+													"        pm.expect(product.quantity).to.be.a('number').and.to.be.at.least(0, \"Quantity should be a non-negative integer\");\r",
+													"    });\r",
+													"});\r",
+													"\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": \"alejo\",\r\n    \"password\": \"Hola1597!!!\"\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/products",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"products"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GET PRODUCT BY ID",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 200\", function () {\r",
+													"    pm.expect(pm.response.code).to.eql(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"Response has required fields\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"\r",
+													"    pm.expect(responseData).to.be.an('object');\r",
+													"    pm.expect(responseData).to.have.all.keys('productId', 'productTitle', 'imageUrl', 'sku', 'priceUnit', 'quantity', 'category');\r",
+													"    \r",
+													"    pm.expect(responseData.category).to.be.an('object');\r",
+													"    pm.expect(responseData.category).to.have.all.keys('categoryId', 'categoryTitle', 'imageUrl');\r",
+													"});\r",
+													"\r",
+													"\r",
+													"pm.test(\"PriceUnit and Quantity must be non-negative numbers\", function () {\r",
+													"    const responseData = pm.response.json();\r",
+													"    \r",
+													"    pm.expect(responseData.priceUnit).to.be.a('number').and.to.be.at.least(0);\r",
+													"    pm.expect(responseData.quantity).to.be.a('number').and.to.be.at.least(0);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{adminToken}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": \"alejo\",\r\n    \"password\": \"Hola1597!!!\"\r\n}"
+										},
+										"url": {
+											"raw": "{{url}}/products/1",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"products",
+												"1"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://stage.ticktopia.shop/app/api",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": ""
+		},
+		{
+			"key": "adminToken",
+			"value": ""
+		},
+		{
+			"key": "otheruserToken",
+			"value": ""
+		}
+	]
+}
